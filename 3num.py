@@ -8,14 +8,16 @@ import xml.etree.ElementTree as ET
 from optparse import OptionParser
 from libnmap.parser import NmapParser, NmapParserException
 from libnmap.process import NmapProcess
+from tabulate import tabulate
 
 # Further enumeration
-def do_intense(IP,port_list):
-    if '445' or '135' or '139' in port_list:
+def do_intense(IP,port_list,output_dir):
+    print port_list
+    if (445 in port_list or 139 in port_list or 135 in port_list):
         print "[+] Running enum4linux"
 	cmd = "enum4linux %s" % (IP)
 	args = shlex.split(cmd)
-	out_file = "/tmp/%s-enum4linux.txt" % (IP)
+	out_file = "%s%s-enum4linux.txt" % (output_dir,IP)
         with open(out_file, 'w') as f:
             subprocess.call(args, stdout=f)
 	print "[+] Enum4linux complete. You can view it here: %s" % (out_file)
@@ -63,6 +65,27 @@ def print_scan(nmap_report):
             print(pserv)
     print(nmap_report.summary)
 
+# Generate LaTeX table and export to markdown with Pandoc
+def do_generate_table(nmap_report,output_dir):
+    for host in nmap_report.hosts:
+	if len(host.hostnames):
+		tmp_host = host.hostnames.pop()
+	else:
+	    tmp_host = host.address
+	headers = ["PORT","STATE","SERVICE"]
+	table = []
+	for serv in host.services:
+		table.append([str(serv.port)+"/"+serv.protocol, serv.state, serv.service])
+	#print tabulate(table, headers, tablefmt="grid")
+	out_file = "%s%s-ports-table.md" % (output_dir,tmp_host)
+	md_header = "## %s Port Data\n\n" % (tmp_host)
+	f = open(out_file, "w")
+	f.write(md_header)
+	f.write(tabulate(table, headers, tablefmt="grid"))
+	f.write("\n\n")
+	f.close()
+	print "[+] Table data stored in %s%s-ports-table.md" % (output_dir,tmp_host)
+
 # Get all the ports into a list
 def get_ports(nmap_report):
     port_list = []
@@ -97,6 +120,8 @@ if __name__ == "__main__":
     parser.add_option('-H', '--host', type='string', action='store', dest='target_host', help='Target Host IP.')
     parser.add_option('-i', '--intense', action='store_true', dest='intense', help='Perform further enumeration tasks on found services')
     parser.add_option('-V', '--verbose', action='store_true', dest='verbose', help='Perform service identification')
+    parser.add_option('-t', '--table', action='store_true', dest='to_table', help='Save nmap results to Markdown table')
+    parser.add_option('-o', '--output', action='store', type="string", dest="output_dir")
     (options, args) = parser.parse_args()
     IP = options.target_host
     if options.target_host is None:
@@ -124,12 +149,20 @@ if __name__ == "__main__":
     # Print out the results
     if report:
 	print_scan(report)
+	if options.to_table == True:
+	    if options.output_dir:
+	        do_generate_table(report,options.output_dir)
+	    else:
+	 	print "[-] Save output selected but no directory supplied. Use -o to supply directory"
     else:
 	print("No results returned")
 
 # Some future stuff here. 
     if options.intense == True:
-        do_intense(IP,port_list)
+	if options.output_dir:
+            do_intense(IP,port_list,options.output_dir)
+	else:
+	    print "[-] Unable to run intense scans, no output directory selected. Use -o to supply output director."
 
 
 
