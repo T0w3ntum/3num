@@ -74,8 +74,14 @@ def do_generate_table(nmap_report,output_dir):
 	    tmp_host = host.address
 	headers = ["PORT","STATE","SERVICE"]
 	table = []
+ 
 	for serv in host.services:
-		table.append([str(serv.port)+"/"+serv.protocol, serv.state, serv.service])
+		banner = ""
+		if len(serv.banner):
+		    banner = serv.service + " " + serv.banner
+		else:
+		    banner = serv.service
+		table.append([str(serv.port)+"/"+serv.protocol, serv.state, banner])
 	#print tabulate(table, headers, tablefmt="grid")
 	out_file = "%s%s-ports-table.md" % (output_dir,tmp_host)
 	md_header = "## %s Port Data\n\n" % (tmp_host)
