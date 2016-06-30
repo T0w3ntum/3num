@@ -162,7 +162,7 @@ if __name__ == "__main__":
 	if options.output_dir:
             do_intense(IP,port_list,options.output_dir)
 	else:
-	    print "[-] Unable to run intense scans, no output directory selected. Use -o to supply output director."
+	    print "[-] Unable to run intense scans, no output directory selected. Use -o to supply output directory."
 
 
 
