@@ -120,8 +120,8 @@ if __name__ == "__main__":
     parser.add_option('-H', '--host', type='string', action='store', dest='target_host', help='Target Host IP.')
     parser.add_option('-i', '--intense', action='store_true', dest='intense', help='Perform further enumeration tasks on found services')
     parser.add_option('-V', '--verbose', action='store_true', dest='verbose', help='Perform service identification')
-    parser.add_option('-t', '--table', action='store_true', dest='to_table', help='Save nmap results to Markdown table')
-    parser.add_option('-o', '--output', action='store', type="string", dest="output_dir")
+    parser.add_option('-t', '--table', action='store_true', dest='to_table', help='Save nmap results to Markdown table -o required')
+    parser.add_option('-o', '--output', action='store', type="string", dest="output_dir", help="Supply output directory for results. Trailing / required")
     (options, args) = parser.parse_args()
     IP = options.target_host
     if options.target_host is None:
