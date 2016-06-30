@@ -9,7 +9,7 @@ The following libraries are required.
 
 ### Usage
 
-At it's core, 3num will perform a fast port scan if only supplied with a host. 
+At its core, 3num will perform a fast port scan if only supplied with a host. 
 
 ```
 3num.py -H 127.0.0.1
